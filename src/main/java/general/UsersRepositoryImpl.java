@@ -7,30 +7,30 @@ import java.sql.Statement;
 
 public class UsersRepositoryImpl implements UsersRepository {
 
-    Connection connection;
-    Statement statement;
+//    Connection connection;
+//    Statement statement;
 
-    public void prepareStatement() {
+    public Statement prepareStatement(Connection connection) {
         connection = DatabaseSource.getConnection();
+        Statement statement = null;
         try {
             System.out.println("Connection autocommit=" + connection.getAutoCommit());
             statement = connection.createStatement();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return statement;
     }
 
 
     public User createUser(String firstName, String lastName) {
-//        Connection connection = DatabaseSource.getConnection();
-        prepareStatement();
 
-        try  {
-            Statement statement = connection.createStatement();
+        try (Connection connection = DatabaseSource.getConnection();
+             Statement statement = prepareStatement(connection)) {
             statement.execute("INSERT INTO users (firstName,Lastname) VALUES ('" + firstName + "', '" + lastName + "')");
             ResultSet idResultSet = statement.getGeneratedKeys();
 
-            statement.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
@@ -47,11 +47,11 @@ public class UsersRepositoryImpl implements UsersRepository {
     }
 
     public User findUserById(int id) {
-//        Connection connection = DatabaseSource.getConnection();
-        prepareStatement();
         User user = new User();
-        try {
-//            Statement statement = connection.createStatement();
+
+        try (Connection connection = DatabaseSource.getConnection();
+             Statement statement = prepareStatement(connection)) {
+
             ResultSet result = statement.executeQuery("SELECT * FROM users WHERE id=" + String.valueOf(id));
 
             while (result.next()) {

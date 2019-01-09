@@ -8,7 +8,7 @@ public class DatabaseSource {
 
 
     static JdbcDataSource dataSource;
-    static Connection connection;
+//    static Connection connection;
 
 
     public static void establishDatasource() {
@@ -17,26 +17,25 @@ public class DatabaseSource {
         dataSource.setUser("sa");
         dataSource.setPassword("");
 
+    }
+
+    public static Connection getConnection(){
+        Connection connection = null;
         try {
             connection = dataSource.getConnection();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-    }
-
-    public static Connection getConnection(){
-
-
         return connection;
     }
 
-    public static void closeConnection(){
-        try {
-            connection.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+//    public static void closeConnection(){
+//        try {
+//            connection.close();
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//    }
 
 }
