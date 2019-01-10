@@ -1,6 +1,8 @@
 package general;
 
 import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class UsersRepositoryImpl implements UsersRepository {
 
@@ -88,7 +90,7 @@ public class UsersRepositoryImpl implements UsersRepository {
 //            }
 
             statement.close();
-            System.out.println("Deleted user " +  user.getFirstName() + " " + user.getLastName());
+            System.out.println("Deleted user " + user.getFirstName() + " " + user.getLastName());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -121,4 +123,38 @@ public class UsersRepositoryImpl implements UsersRepository {
 
         return user;
     }
+
+    public List<User> searchByLastName(String lastNameSearch) {
+        List<User> users = new LinkedList<>();
+        String sql = "SELECT * FROM users WHERE lastName = '" + lastNameSearch + "'";
+
+        try (Connection connection = DatabaseSource.getConnection();
+             Statement statement = prepareStatement(connection)) {
+
+
+            ResultSet result = statement.executeQuery(sql);
+
+            while (result.next()) {
+                User user = new User();
+                int returnedId = result.getInt("id");
+                String firstName = result.getString("firstName");
+                String lastName = result.getString("lastName");
+
+                user.setId(returnedId);
+                user.setFirstName(firstName);
+                user.setLastName(lastName);
+
+                users.add(user);
+            }
+
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+
+        return users;
+    }
+
+
 }
