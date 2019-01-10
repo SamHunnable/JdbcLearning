@@ -4,11 +4,13 @@ import org.h2.jdbcx.JdbcDataSource;
 
 import java.sql.Connection;
 
-public class DatabaseSource {
+public final class DatabaseSource {
 
 
     static JdbcDataSource dataSource;
 //    static Connection connection;
+
+//    private DatabaseSource() {}
 
 
     public static void establishDatasource() {
