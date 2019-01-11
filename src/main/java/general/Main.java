@@ -45,6 +45,7 @@ public class Main {
                 default:
                     System.out.println("Invalid command");
             }
+            System.out.println("");
         }
 
 
@@ -52,24 +53,28 @@ public class Main {
     }
 
     public void create() {
-        System.out.println("Enter first and last name of record to add");
+        System.out.println("Enter the first name");
         String firstName = scanner.nextLine();
+        System.out.println("Enter the last name");
         String lastName = scanner.nextLine();
-        usersRepository.createUser(firstName, lastName);
+        User user = usersRepository.createUser(firstName, lastName);
+        System.out.println("Added user " + user.toString());
     }
 
     public void search() {
-        System.out.println("You have selected search. Would you like to search by id or by name?");
+        System.out.println("You have selected search. Would you like to search by id or by name? To get all records type all.");
         String command = scanner.nextLine();
+        System.out.println("");
 
         switch (command) {
             case "id":
                 System.out.println("Enter id of record you wish to retrieve");
                 int id = scanner.nextInt();
                 User user = usersRepository.findUserById(id);
+                System.out.println("Found user " + user.toString());
                 break;
             case "name":
-                System.out.println("Enter the las name you wish to search for:");
+                System.out.println("Enter the last name you wish to search for:");
                 String lastNameSearch = scanner.nextLine();
                 List<User> users = usersRepository.searchByLastName(lastNameSearch);
                 if (users == null || users.size() < 1) System.out.println("No users found");
@@ -77,6 +82,12 @@ public class Main {
                     for (User foundUser : users) {
                         System.out.println(foundUser.getId() + " " + foundUser.getFirstName() + " " + foundUser.getLastName());
                     }
+                }
+                break;
+            case "all":
+                List<User> allUsers = usersRepository.getAllRecords();
+                for (User eachUser:allUsers) {
+                    System.out.println(eachUser.toString());
                 }
                 break;
             default:

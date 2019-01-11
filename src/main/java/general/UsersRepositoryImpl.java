@@ -25,7 +25,7 @@ public class UsersRepositoryImpl implements UsersRepository {
         User user = new User();
         user.setFirstName(firstName);
         user.setLastName(lastName);
-        String sql = "INSERT INTO users (firstName,Lastname) VALUES ('" + firstName + "', '" + lastName + "')";
+        String sql = "INSERT INTO users (firstName, lastName) VALUES ('" + firstName + "', '" + lastName + "')";
 
         try (Connection connection = DatabaseSource.getConnection()) {
 
@@ -42,7 +42,6 @@ public class UsersRepositoryImpl implements UsersRepository {
             ex.printStackTrace();
         }
 
-        System.out.println("Added user with id " + user.getId() + ", " + firstName + " " + lastName);
         return user;
     }
 
@@ -74,8 +73,9 @@ public class UsersRepositoryImpl implements UsersRepository {
         return null;
     }
 
-    public void deleteUser(int id) {
-        User user = new User();
+    public User deleteUser(int id) {
+        User user = null;
+
         String sql = "DELETE FROM users WHERE id=" + id;
 
         try (Connection connection = DatabaseSource.getConnection()) {
@@ -94,29 +94,26 @@ public class UsersRepositoryImpl implements UsersRepository {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        return user;
 
     }
 
     public User findUserById(int id) {
         User user = new User();
+        String sql = "SELECT * FROM users WHERE id = ?";
 
-        try (Connection connection = DatabaseSource.getConnection();
-             Statement statement = prepareStatement(connection)) {
+        try (Connection connection = DatabaseSource.getConnection()) {
 
-            ResultSet result = statement.executeQuery("SELECT * FROM users WHERE id=" + String.valueOf(id));
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, String.valueOf(id));
+            ResultSet result = preparedStatement.executeQuery();
 
             while (result.next()) {
-                int returnedId = result.getInt("id");
-                String firstName = result.getString("firstName");
-                String lastName = result.getString("lastName");
-
-                user.setId(returnedId);
-                user.setFirstName(firstName);
-                user.setLastName(lastName);
-
-                System.out.println(firstName + " " + lastName);
+                user.setId(result.getInt("id"));
+                user.setFirstName(result.getString("firstName"));
+                user.setLastName(result.getString("lastName"));
             }
-
+            preparedStatement.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -126,13 +123,12 @@ public class UsersRepositoryImpl implements UsersRepository {
 
     public List<User> searchByLastName(String lastNameSearch) {
         List<User> users = new LinkedList<>();
-        String sql = "SELECT * FROM users WHERE lastName = '" + lastNameSearch + "'";
+        String sql = "SELECT * FROM users WHERE lastName = ?";
 
-        try (Connection connection = DatabaseSource.getConnection();
-             Statement statement = prepareStatement(connection)) {
-
-
-            ResultSet result = statement.executeQuery(sql);
+        try (Connection connection = DatabaseSource.getConnection()) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, lastNameSearch);
+            ResultSet result = ps.executeQuery();
 
             while (result.next()) {
                 User user = new User();
@@ -146,15 +142,35 @@ public class UsersRepositoryImpl implements UsersRepository {
 
                 users.add(user);
             }
-
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-
         return users;
     }
 
+
+    public List<User> getAllRecords() {
+        List<User> users = new LinkedList<>();
+        String sql = "SELECT * FROM users";
+
+        try (Connection connection = DatabaseSource.getConnection();
+             Statement statement = prepareStatement(connection)) {
+
+            ResultSet result = statement.executeQuery(sql);
+
+            while (result.next()) {
+                User user = new User();
+                user.setId(result.getInt("id"));
+                user.setFirstName(result.getString("firstName"));
+                user.setLastName(result.getString("lastName"));
+                users.add(user);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return users;
+    }
 
 }
