@@ -62,13 +62,13 @@ public class Main {
     }
 
     public void search() {
-        System.out.println("You have selected search. Would you like to search by id or by name? To get all records type all.");
+        System.out.println("You have selected search. Would you like to search by UserId or by name? To get all records type all.");
         String command = scanner.nextLine();
         System.out.println("");
 
         switch (command) {
-            case "id":
-                System.out.println("Enter id of record you wish to retrieve");
+            case "UserId":
+                System.out.println("Enter UserId of record you wish to retrieve");
                 int id = scanner.nextInt();
                 User user = usersRepository.findUserById(id);
                 System.out.println("Found user " + user.toString());
@@ -80,7 +80,7 @@ public class Main {
                 if (users == null || users.size() < 1) System.out.println("No users found");
                 else {
                     for (User foundUser : users) {
-                        System.out.println(foundUser.getId() + " " + foundUser.getFirstName() + " " + foundUser.getLastName());
+                        System.out.println(foundUser.getUserId() + " " + foundUser.getFirstName() + " " + foundUser.getLastName());
                     }
                 }
                 break;
@@ -98,7 +98,7 @@ public class Main {
     }
 
     public void update() {
-        System.out.println("Enter id of record you wish to update");
+        System.out.println("Enter UserId of record you wish to update");
         int updateId = scanner.nextInt();
         usersRepository.findUserById(updateId);
         System.out.println("Enter the new first name");
@@ -109,7 +109,7 @@ public class Main {
     }
 
     public void delete() {
-        System.out.println("Enter id of record you wish to delete");
+        System.out.println("Enter UserId of record you wish to delete");
         int deleteId = scanner.nextInt();
         usersRepository.deleteUser(deleteId);
     }

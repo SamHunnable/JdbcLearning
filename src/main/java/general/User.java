@@ -2,16 +2,16 @@ package general;
 
 public class User {
 
-    public int id;
+    public int UserId;
     public String firstName;
     public String lastName;
 
-    public int getId() {
-        return id;
+    public int getUserId() {
+        return UserId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setUserId(int userId) {
+        this.UserId = userId;
     }
 
     public String getFirstName() {
@@ -33,7 +33,7 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
+                "UserId=" + UserId +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 '}';

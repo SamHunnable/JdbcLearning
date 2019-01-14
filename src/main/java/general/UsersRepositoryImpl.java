@@ -12,6 +12,7 @@ public class UsersRepositoryImpl implements UsersRepository {
         Statement statement = null;
         try {
 //            System.out.println("Connection autocommit=" + connection.getAutoCommit());
+//            connection.setAutoCommit(false);
             statement = connection.createStatement();
 
         } catch (SQLException e) {
@@ -34,7 +35,7 @@ public class UsersRepositoryImpl implements UsersRepository {
             statement.execute();
             ResultSet idResultSet = statement.getGeneratedKeys();
             if (idResultSet.next()) {
-                user.setId(idResultSet.getInt(1));
+                user.setUserId(idResultSet.getInt(1));
             }
 
             statement.close();
@@ -46,7 +47,7 @@ public class UsersRepositoryImpl implements UsersRepository {
     }
 
     public User updateUser(int id, String firstName, String lastName) {
-        String sql = "UPDATE users SET firstName = '" + firstName + "', lastname = '" + lastName + "' " + "WHERE id = " + id;
+        String sql = "UPDATE users SET firstName = '" + firstName + "', lastname = '" + lastName + "' " + "WHERE UserId = " + id;
         User user = new User();
 
         try (Connection connection = DatabaseSource.getConnection()) {
@@ -57,7 +58,7 @@ public class UsersRepositoryImpl implements UsersRepository {
 //            ResultSet resultSet = statement.getGeneratedKeys();
 //
 //            if (resultSet.next()) {
-//                user.setId(resultSet.getInt(1));
+//                user.setUserId(resultSet.getInt(1));
 //                user.setFirstName(resultSet.getString("firstName"));
 //                user.setLastName(resultSet.getString("lastName"));
 //            }
@@ -76,18 +77,12 @@ public class UsersRepositoryImpl implements UsersRepository {
     public User deleteUser(int id) {
         User user = null;
 
-        String sql = "DELETE FROM users WHERE id=" + id;
+        String sql = "DELETE FROM users WHERE UserId=" + id;
 
         try (Connection connection = DatabaseSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             user = findUserById(id);
             statement.execute();
-//            ResultSet resultSet = statement.getGeneratedKeys();
-
-//            while (resultSet.next()) {
-//                user.setFirstName(resultSet.getString("firstName"));
-//                user.setLastName(resultSet.getString("lastName"));
-//            }
 
             statement.close();
             System.out.println("Deleted user " + user.getFirstName() + " " + user.getLastName());
@@ -100,7 +95,7 @@ public class UsersRepositoryImpl implements UsersRepository {
 
     public User findUserById(int id) {
         User user = new User();
-        String sql = "SELECT * FROM users WHERE id = ?";
+        String sql = "SELECT * FROM users WHERE UserId = ?";
 
         try (Connection connection = DatabaseSource.getConnection()) {
 
@@ -109,7 +104,7 @@ public class UsersRepositoryImpl implements UsersRepository {
             ResultSet result = preparedStatement.executeQuery();
 
             while (result.next()) {
-                user.setId(result.getInt("id"));
+                user.setUserId(result.getInt("UserId"));
                 user.setFirstName(result.getString("firstName"));
                 user.setLastName(result.getString("lastName"));
             }
@@ -132,11 +127,11 @@ public class UsersRepositoryImpl implements UsersRepository {
 
             while (result.next()) {
                 User user = new User();
-                int returnedId = result.getInt("id");
+                int returnedId = result.getInt("UserId");
                 String firstName = result.getString("firstName");
                 String lastName = result.getString("lastName");
 
-                user.setId(returnedId);
+                user.setUserId(returnedId);
                 user.setFirstName(firstName);
                 user.setLastName(lastName);
 
@@ -161,7 +156,7 @@ public class UsersRepositoryImpl implements UsersRepository {
 
             while (result.next()) {
                 User user = new User();
-                user.setId(result.getInt("id"));
+                user.setUserId(result.getInt("UserId"));
                 user.setFirstName(result.getString("firstName"));
                 user.setLastName(result.getString("lastName"));
                 users.add(user);
@@ -171,6 +166,70 @@ public class UsersRepositoryImpl implements UsersRepository {
         }
 
         return users;
+    }
+
+    public void getUserandPermissionById(int id) {
+
+        String sql = "SELECT * FROM users INNER JOIN permissions ON users.id=permissions.id WHERE users.id=?;";
+
+        try (Connection connection = DatabaseSource.getConnection()) {
+
+            connection.setAutoCommit(false);
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, String.valueOf(id));
+            ResultSet resultSet = statement.executeQuery();
+            connection.commit();
+
+            while (resultSet.next()) {
+//                resultSet.getMetaData().
+                System.out.println(resultSet.getInt("id"));
+                System.out.println(resultSet.getString("firstName"));
+                System.out.println(resultSet.getString("lastName"));
+                System.out.println(resultSet.getString("permission"));
+            }
+
+            statement.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        DatabaseSource.establishDatasource();
+        UsersRepositoryImpl usersRepository = new UsersRepositoryImpl();
+        usersRepository.createUserAndPermission("test", " permission test", "a permission");
+    }
+
+    public void createUserAndPermission(String firstName, String lastName, String permission) {
+
+        String userSql = "INSERT INTO users (firstName, lastName) VALUES (?, ?)";
+        String permissionSql = "INSERT INTO permissions (permission, id) VALUES (?, ?)";
+
+
+        try (Connection connection = DatabaseSource.getConnection()) {
+            connection.setAutoCommit(false);
+
+            PreparedStatement userStatement = connection.prepareStatement(userSql);
+            userStatement.setString(1, firstName);
+            userStatement.setString(2, lastName);
+
+
+            userStatement.execute();
+            ResultSet userResult = userStatement.getGeneratedKeys();
+            int userId = userResult.getInt("id");
+
+            PreparedStatement permissionStatement = connection.prepareStatement(permissionSql);
+            permissionStatement.setString(1, permission);
+            permissionStatement.setInt(2, userId);
+
+            permissionStatement.execute();
+
+            connection.commit();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
     }
 
 }
